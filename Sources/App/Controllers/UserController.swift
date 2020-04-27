@@ -60,28 +60,9 @@ extension UserController.TokenProtected: RouteCollection {
         let user = try req.auth.require(User.self)
         return DataWrapper.encodeResponse(data: user, for: req)
     }
-
-    func createTodo(req: Request) throws -> EventLoopFuture<HTTPStatus>{
-        try req.content.decode(Todo.self).save(on: req.db).transform(to: .ok)
-    }
     
-    func deleteTodo(req: Request) throws -> EventLoopFuture<HTTPStatus> {
-        try req.content.decode(Todo.self).delete(on: req.db).transform(to: .ok)
-    }
-    
-    func fetchAllTodosForUser(req: Request) throws -> EventLoopFuture<Response> {
-      let userID:UUID?  = req.parameters.get(Endpoint.API.Todos.Params.userID.description, as: UUID.self)
-      return User.find(userID, on: req.db).flatMap { user in
-        return Todo.query(on: req.db).filter(\.user == user!).unwrap(or: Abort(.notFound)).flatMap {
-          DataWrapper.encodeResponse(data: $0.response, for: req)
-        }
-      }
-    }
     func boot(routes: RoutesBuilder) throws {
         routes.get(Endpoint.API.Users.checkMe, use: showMe)
-        routes.post(Endpoint.API.Todos.createTodo, use: createTodo)
-        routes.post(Endpoint.API.Todos.deleteTodo, use: deleteTodo)
-        routes.get(Endpoint.API.Todos.index + [Endpoint.API.Todos.Params.userID], use: fetchAllTodosForUser)
     }
     
 }

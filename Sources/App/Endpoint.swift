@@ -25,6 +25,7 @@ extension Endpoint.API {
         static let deleteTodo: [PathComponent] = todos + ["delete"]
         static let showTodo: [PathComponent] = todos + ["show"]
         static let showTodosForUser: [PathComponent] = todos + ["showAll"]
+        static let shoAll: [PathComponent] = todos + ["all"]
         enum Params {
             static let userID: PathComponent = .parameter("userID")
         }
