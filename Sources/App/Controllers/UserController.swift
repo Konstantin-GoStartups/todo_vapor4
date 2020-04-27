@@ -25,15 +25,19 @@ extension UserController.Unprotected: RouteCollection {
             return DataWrapper.encodeResponse(data: loginResponse, for: req)
         }
     }
-    
+    // an identical method was named with prefix `fetch`, you should be consistent about the nameing,
+    // so these methods should be with similar names, for example:
+    // getAllUsers, getAllTodosForUser, getAllTodos
+    // or without prefix
+    // allUsers, allTodosForUser, allTodos
+    // `fetch` is not good prefix
     func getAllUsers(req: Request) throws -> EventLoopFuture<Response> {
-        return User.query(on: req.db).all().map{
-            $0.map{
-                $0.response
+        User.query(on: req.db)
+            .all()
+            .map { $0.map{ $0.response } }
+            .flatMap{
+                DataWrapper.encodeResponse(data: $0, for: req)
             }
-        }.flatMap{
-            DataWrapper.encodeResponse(data: $0, for: req)
-        }
     }
     func boot(routes: RoutesBuilder) throws {
         routes.post(Endpoint.API.Users.register, use: register)
@@ -47,7 +51,8 @@ extension UserController.PasswordProtected: RouteCollection {
         let token = try req.jwt.sign(user)
         let loginResponse = UserLoginResponse(
             user: user.response,
-            accessToken: token)
+            accessToken: token
+        )
         return DataWrapper.encodeResponse(data: loginResponse, for: req)
     }
     func boot(routes: RoutesBuilder) throws {
